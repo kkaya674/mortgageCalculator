@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mortgage Simulation</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            height: fit-content;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .results-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .summary-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+
+        .summary-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .summary-item .label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .summary-item .value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .chart-container h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 Mortgage Simulation</h1>
+            <p>Analyze the advantage of buying vs renting a home</p>
+        </div>
+
+        <div class="content">
+            <div class="input-section">
+                <h3>📊 Simulation Parameters</h3>
+                
+                <div class="input-group">
+                    <label for="home_price">Home Price (€)</label>
+                    <input type="number" id="home_price" value="195000" step="1000">
+                </div>
+
+                <div class="input-group">
+                    <label for="down_payment_percentage">Down Payment Percentage (%)</label>
+                    <input type="number" id="down_payment_percentage" value="10" step="1" min="0" max="100">
+                </div>
+
+                <div class="input-group">
+                    <label for="loan_term_years">Loan Term (Years)</label>
+                    <input type="number" id="loan_term_years" value="10" step="1" min="1" max="30">
+                </div>
+
+                <div class="input-group">
+                    <label for="interest_rate_annual">Annual Interest Rate (%)</label>
+                    <input type="number" id="interest_rate_annual" value="3.25" step="0.1" min="0" max="20">
+                </div>
+
+                <div class="input-group">
+                    <label for="home_appreciation_rate_annual">Annual Home Value Appreciation (%)</label>
+                    <input type="number" id="home_appreciation_rate_annual" value="2" step="0.1" min="0" max="20">
+                </div>
+
+                <div class="input-group">
+                    <label for="rental_savings_annual">Monthly Rent Savings (€)</label>
+                    <input type="number" id="rental_savings_annual" value="1000" step="50">
+                </div>
+
+                <div class="input-group">
+                    <label for="annual_costs">Annual Costs (€)</label>
+                    <input type="number" id="annual_costs" value="1500" step="100">
+                </div>
+
+                <div class="input-group">
+                    <label for="rental_increase_rate_annual">Annual Rent Increase (%)</label>
+                    <input type="number" id="rental_increase_rate_annual" value="2" step="0.1" min="0" max="20">
+                </div>
+
+                <div class="input-group">
+                    <label for="estate_agent_fee_percentage">Estate Agent Fee (%)</label>
+                    <input type="number" id="estate_agent_fee_percentage" value="3.57" step="0.1" min="0" max="10">
+                </div>
+
+                <div class="input-group">
+                    <label for="notary_fee_percentage">Notary Fee (%)</label>
+                    <input type="number" id="notary_fee_percentage" value="2" step="0.1" min="0" max="10">
+                </div>
+
+                <div class="input-group">
+                    <label for="purchase_tax_percentage">Purchase Tax (%)</label>
+                    <input type="number" id="purchase_tax_percentage" value="6" step="0.1" min="0" max="20">
+                </div>
+
+                <div class="input-group">
+                    <label for="simulation_years">Simulation Duration (Years)</label>
+                    <input type="number" id="simulation_years" value="15" step="1" min="1" max="30">
+                </div>
+
+                <button class="btn" onclick="runSimulation()">🚀 Run Simulation</button>
+            </div>
+
+            <div class="results-section">
+                <div id="loading" class="loading" style="display: none;">
+                    <h3>Running simulation...</h3>
+                    <p>Please wait...</p>
+                </div>
+
+                <div id="results" style="display: none;">
+                    <div class="summary-card">
+                        <h3>📈 Simulation Summary</h3>
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <div class="label">Optimal Sale Year</div>
+                                <div class="value" id="optimal_year">-</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="label">Maximum Net Advantage</div>
+                                <div class="value" id="max_profit">-</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="label">Monthly Mortgage Payment</div>
+                                <div class="value" id="monthly_payment">-</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="label">Total Purchase Costs</div>
+                                <div class="value" id="total_costs">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3>📊 Net Advantage Simulation</h3>
+                        <canvas id="profitChart"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3>💰 Monthly Cash Flow</h3>
+                        <canvas id="cashFlowChart"></canvas>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3>📉 Monthly Payment Details</h3>
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let profitChart, cashFlowChart, monthlyChart;
+
+        function runSimulation() {
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            
+            loading.style.display = 'block';
+            results.style.display = 'none';
+
+            // Get parameters from form
+            const params = {
+                home_price: parseFloat(document.getElementById('home_price').value),
+                down_payment_percentage: parseFloat(document.getElementById('down_payment_percentage').value) / 100,
+                loan_term_years: parseInt(document.getElementById('loan_term_years').value),
+                interest_rate_annual: parseFloat(document.getElementById('interest_rate_annual').value) / 100,
+                home_appreciation_rate_annual: parseFloat(document.getElementById('home_appreciation_rate_annual').value) / 100,
+                rental_savings_annual: parseFloat(document.getElementById('rental_savings_annual').value) * 12,
+                annual_costs: parseFloat(document.getElementById('annual_costs').value),
+                rental_increase_rate_annual: parseFloat(document.getElementById('rental_increase_rate_annual').value) / 100,
+                estate_agent_fee_percentage: parseFloat(document.getElementById('estate_agent_fee_percentage').value) / 100,
+                notary_fee_percentage: parseFloat(document.getElementById('notary_fee_percentage').value) / 100,
+                purchase_tax_percentage: parseFloat(document.getElementById('purchase_tax_percentage').value) / 100,
+                simulation_years: parseInt(document.getElementById('simulation_years').value)
+            };
+
+            // Run simulation
+            const data = runSimulationLogic(params);
+            displayResults(data);
+            
+            loading.style.display = 'none';
+            results.style.display = 'block';
+        }
+
+        function runSimulationLogic(params) {
+            // Initial calculations
+            const DOWN_PAYMENT_AMOUNT = params.home_price * params.down_payment_percentage;
+            const LOAN_PRINCIPAL = params.home_price - DOWN_PAYMENT_AMOUNT;
+            const INTEREST_RATE_MONTHLY = params.interest_rate_annual / 12;
+            const TOTAL_PAYMENTS = params.loan_term_years * 12;
+            
+            // Calculate monthly mortgage payment
+            let monthly_payment;
+            if (INTEREST_RATE_MONTHLY > 0) {
+                monthly_payment = LOAN_PRINCIPAL * (INTEREST_RATE_MONTHLY * Math.pow(1 + INTEREST_RATE_MONTHLY, TOTAL_PAYMENTS)) / (Math.pow(1 + INTEREST_RATE_MONTHLY, TOTAL_PAYMENTS) - 1);
+            } else {
+                monthly_payment = LOAN_PRINCIPAL / TOTAL_PAYMENTS;
+            }
+            
+            // Calculate one-time purchase costs
+            const estate_agent_fee = params.home_price * params.estate_agent_fee_percentage;
+            const notary_fee = params.home_price * params.notary_fee_percentage;
+            const purchase_tax = params.home_price * params.purchase_tax_percentage;
+            const total_one_time_costs = estate_agent_fee + notary_fee + purchase_tax;
+            
+            // Calculate total interest for loan
+            const total_loan_payments = monthly_payment * TOTAL_PAYMENTS;
+            const total_interest_for_loan = total_loan_payments - LOAN_PRINCIPAL;
+            
+            // Annual simulation
+            const simulation_results = [];
+            let cumulative_rent_saved = 0;
+            let current_annual_rent = params.rental_savings_annual;
+            
+            for (let year = 1; year <= params.simulation_years; year++) {
+                cumulative_rent_saved += current_annual_rent;
+                
+                const current_home_value = params.home_price * Math.pow(1 + params.home_appreciation_rate_annual, year);
+                const home_value_appreciation = current_home_value - params.home_price;
+                const total_costs_paid = params.annual_costs * year;
+                
+                let interest_paid;
+                if (year <= params.loan_term_years) {
+                    const payments_made = year * 12;
+                    let remaining_balance;
+                    if (INTEREST_RATE_MONTHLY > 0) {
+                        remaining_balance = LOAN_PRINCIPAL * (Math.pow(1 + INTEREST_RATE_MONTHLY, TOTAL_PAYMENTS) - Math.pow(1 + INTEREST_RATE_MONTHLY, payments_made)) / (Math.pow(1 + INTEREST_RATE_MONTHLY, TOTAL_PAYMENTS) - 1);
+                    } else {
+                        remaining_balance = LOAN_PRINCIPAL * (1 - (payments_made / TOTAL_PAYMENTS));
+                    }
+                    
+                    const total_paid = monthly_payment * payments_made;
+                    const principal_paid = LOAN_PRINCIPAL - remaining_balance;
+                    interest_paid = total_paid - principal_paid;
+                } else {
+                    interest_paid = total_interest_for_loan;
+                }
+                
+                const net_profit = home_value_appreciation + cumulative_rent_saved - interest_paid - total_costs_paid - total_one_time_costs;
+                
+                simulation_results.push({
+                    year: year,
+                    net_profit: net_profit,
+                    current_home_value: current_home_value,
+                    interest_paid: interest_paid,
+                    home_value_appreciation: home_value_appreciation,
+                    total_rent_saved: cumulative_rent_saved
+                });
+                
+                current_annual_rent *= (1 + params.rental_increase_rate_annual);
+            }
+            
+            // Find optimal year
+            const best_year_data = simulation_results.reduce((max, current) => current.net_profit > max.net_profit ? current : max);
+            const optimal_year = best_year_data.year;
+            const max_profit = best_year_data.net_profit;
+            
+            // Monthly breakdown for graphs
+            const months_axis = Array.from({length: params.simulation_years * 12}, (_, i) => i + 1);
+            const remaining_balance_monthly = [];
+            const interest_paid_monthly = [];
+            const principal_paid_monthly = [];
+            const total_payment_monthly = [];
+            const rent_monthly_list = [];
+            
+            let current_balance = LOAN_PRINCIPAL;
+            for (let month_num of months_axis) {
+                let interest_for_month, principal_for_month, payment_this_month;
+                
+                if (month_num <= TOTAL_PAYMENTS) {
+                    interest_for_month = current_balance * INTEREST_RATE_MONTHLY;
+                    principal_for_month = monthly_payment - interest_for_month;
+                    current_balance -= principal_for_month;
+                    if (current_balance < 0) current_balance = 0;
+                    payment_this_month = monthly_payment;
+                } else {
+                    interest_for_month = 0;
+                    principal_for_month = 0;
+                    current_balance = 0;
+                    payment_this_month = 0;
+                }
+                
+                const current_year_index = Math.floor((month_num - 1) / 12);
+                const rent_this_month = (params.rental_savings_annual * Math.pow(1 + params.rental_increase_rate_annual, current_year_index)) / 12;
+                rent_monthly_list.push(rent_this_month);
+                
+                remaining_balance_monthly.push(current_balance);
+                interest_paid_monthly.push(interest_for_month);
+                principal_paid_monthly.push(principal_for_month);
+                total_payment_monthly.push(payment_this_month);
+            }
+            
+            // Cash flow simulation
+            const initial_bank_balance = 0 - (DOWN_PAYMENT_AMOUNT + estate_agent_fee + notary_fee + purchase_tax);
+            const bank_balance = [initial_bank_balance];
+            const monthly_costs = params.annual_costs / 12;
+            
+            for (let month_num = 1; month_num <= params.simulation_years * 12; month_num++) {
+                const current_year_index = Math.floor((month_num - 1) / 12);
+                const rent_this_month = (params.rental_savings_annual * Math.pow(1 + params.rental_increase_rate_annual, current_year_index)) / 12;
+                
+                let loan_payment;
+                if (month_num <= TOTAL_PAYMENTS) {
+                    loan_payment = monthly_payment;
+                } else {
+                    loan_payment = 0;
+                }
+                
+                const net_cash = rent_this_month - loan_payment - monthly_costs;
+                bank_balance.push(bank_balance[bank_balance.length - 1] + net_cash);
+            }
+            
+            return {
+                simulation_results: simulation_results,
+                optimal_year: optimal_year,
+                max_profit: max_profit,
+                monthly_data: {
+                    months: months_axis,
+                    remaining_balance: remaining_balance_monthly,
+                    interest_paid: interest_paid_monthly,
+                    principal_paid: principal_paid_monthly,
+                    total_payment: total_payment_monthly,
+                    rent_monthly: rent_monthly_list,
+                    bank_balance: bank_balance
+                },
+                summary: {
+                    home_price: params.home_price,
+                    down_payment: DOWN_PAYMENT_AMOUNT,
+                    loan_principal: LOAN_PRINCIPAL,
+                    monthly_payment: monthly_payment,
+                    total_one_time_costs: total_one_time_costs,
+                    estate_agent_fee: estate_agent_fee,
+                    notary_fee: notary_fee,
+                    purchase_tax: purchase_tax
+                }
+            };
+        }
+
+        function displayResults(data) {
+            // Update summary
+            document.getElementById('optimal_year').textContent = data.optimal_year;
+            document.getElementById('max_profit').textContent = `€${data.max_profit.toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+            document.getElementById('monthly_payment').textContent = `€${data.summary.monthly_payment.toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+            document.getElementById('total_costs').textContent = `€${data.summary.total_one_time_costs.toLocaleString('de-DE', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+
+            // Create charts
+            createProfitChart(data);
+            createCashFlowChart(data);
+            createMonthlyChart(data);
+        }
+
+        function createProfitChart(data) {
+            const ctx = document.getElementById('profitChart').getContext('2d');
+            
+            if (profitChart) {
+                profitChart.destroy();
+            }
+
+            const years = data.simulation_results.map(r => r.year);
+            const profits = data.simulation_results.map(r => r.net_profit);
+
+            profitChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: years,
+                    datasets: [{
+                        label: 'Net Advantage (vs. Renting)',
+                        data: profits,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '€' + value.toLocaleString('de-DE');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createCashFlowChart(data) {
+            const ctx = document.getElementById('cashFlowChart').getContext('2d');
+            
+            if (cashFlowChart) {
+                cashFlowChart.destroy();
+            }
+
+            const months = data.monthly_data.bank_balance.map((_, i) => i);
+            const balance = data.monthly_data.bank_balance;
+
+            cashFlowChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Bank Balance',
+                        data: balance,
+                        borderColor: '#764ba2',
+                        backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            ticks: {
+                                callback: function(value) {
+                                    return '€' + value.toLocaleString('de-DE');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createMonthlyChart(data) {
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            
+            if (monthlyChart) {
+                monthlyChart.destroy();
+            }
+
+            const months = data.monthly_data.months;
+            const interest = data.monthly_data.interest_paid;
+            const principal = data.monthly_data.principal_paid;
+            const rent = data.monthly_data.rent_monthly;
+            const totalPayment = data.monthly_data.total_payment;
+
+            monthlyChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [
+                        {
+                            label: 'Monthly Interest Payment',
+                            data: interest,
+                            borderColor: '#ff6384',
+                            backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Monthly Principal Payment',
+                            data: principal,
+                            borderColor: '#36a2eb',
+                            backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Avoided Monthly Rent',
+                            data: rent,
+                            borderColor: '#4bc0c0',
+                            backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                            tension: 0.1
+                        },
+                        {
+                            label: 'Total Monthly Payment',
+                            data: totalPayment,
+                            borderColor: '#ffcd56',
+                            backgroundColor: 'rgba(255, 205, 86, 0.1)',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '€' + value.toLocaleString('de-DE');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Run initial simulation
+        window.onload = function() {
+            runSimulation();
+        };
+    </script>
+</body>
+</html> 

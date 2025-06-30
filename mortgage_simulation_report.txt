@@ -1,0 +1,25 @@
+
+Mortgage Profitability Simulation - Report
+
+Scenario:
+- Home Price: €195,000.00
+- Down Payment: €19,500.00 (10%)
+- Loan Amount: €175,500.00
+- Loan Term: 20 years at 3.25% interest
+
+Initial One-Time Costs:
+- Estate Agent Fee (3.57%): -€6,961.50
+- Notary Fee (2.00%):      -€3,900.00
+- Purchase Tax (6.00%):      -€11,700.00
+---------------------------------
+- Total One-Time Costs:    -€22,561.50
+
+Optimal Year to Sell: Year 20
+--------------------------------------------------
+💰 Maximum Net Advantage (vs. Renting): €270,363.83
+
+Details for Year 20:
+📈 Home Value Appreciation   : +€94,759.74 (New Value: €289,759.74)
+🏠 Avoided Rent Cost         : +€291,568.44
+💸 Interest Paid (Cumulative): -€63,402.85
+🏛️ Annual Costs (Cumulative) : -€30,000.00

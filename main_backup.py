@@ -4,20 +4,20 @@ import matplotlib.pyplot as plt
 # -----------------------------
 # 📌 Inputs (Scenario)
 # -----------------------------
-HOME_PRICE = 195000
-DOWN_PAYMENT_PERCENTAGE = 0.10
+HOME_PRICE = 339000
+DOWN_PAYMENT_PERCENTAGE = 0.20
 # The full term of the mortgage loan in years
-LOAN_TERM_YEARS = 20
-# Annual mortgage interest rate (e.g., 325%)
+LOAN_TERM_YEARS = 10
+# Annual mortgage interest rate (e.g., 3%)
 INTEREST_RATE_ANNUAL = 0.0325
 # Expected annual home value appreciation rate (e.g., 2%)
-HOME_APPRECIATION_RATE_ANNUAL = INTEREST_RATE_ANNUAL*0.02/0.0325
+HOME_APPRECIATION_RATE_ANNUAL = 0.02
 # Annual savings from not renting (e.g., 1200/month * 12)
-RENTAL_SAVINGS_ANNUAL = 1000 * 12
+RENTAL_SAVINGS_ANNUAL = 1500 * 12
 # Annual costs like property tax, insurance, and maintenance
 ANNUAL_COSTS = 1500
 # Expected annual increase in rent (e.g., 5%)
-RENTAL_INCREASE_RATE_ANNUAL =INTEREST_RATE_ANNUAL* 0.02/0.0325
+RENTAL_INCREASE_RATE_ANNUAL = 0.02
 # --- One-time Purchase Costs (Percentages of Home Price) ---
 ESTATE_AGENT_FEE_PERCENTAGE = 0.0357
 NOTARY_FEE_PERCENTAGE = 0.02
@@ -220,41 +220,4 @@ ax1.legend(plots, [p.get_label() for p in plots], loc='upper center', bbox_to_an
 
 plt.tight_layout()
 plt.savefig("aylik_detaylar.png")
-plt.show()
-
-# -----------------------------
-# 📊 Grafik 3: Kümülatif Nakit Akışı (Ev Satılmadan)
-# -----------------------------
-
-initial_bank_balance = 0 - (DOWN_PAYMENT_AMOUNT + estate_agent_fee + notary_fee + purchase_tax)
-bank_balance = [initial_bank_balance]
-
-monthly_costs = ANNUAL_COSTS / 12
-
-for month_num in range(1, SIMULATION_YEARS * 12 + 1):
-    # Kira geliri (pozitif)
-    current_year_index = (month_num - 1) // 12
-    rent_this_month = (RENTAL_SAVINGS_ANNUAL * (1 + RENTAL_INCREASE_RATE_ANNUAL)**current_year_index) / 12
-    # Kredi taksiti (negatif, sadece kredi süresince)
-    if month_num <= TOTAL_PAYMENTS:
-        loan_payment = monthly_payment
-    else:
-        loan_payment = 0
-    # Aylık net nakit akışı
-    net_cash = rent_this_month - loan_payment - monthly_costs
-    # Yeni bakiye
-    bank_balance.append(bank_balance[-1] + net_cash)
-
-months_axis = np.arange(0, SIMULATION_YEARS * 12 + 1)
-
-plt.figure(figsize=(12, 7))
-plt.plot(months_axis, bank_balance, label='Banka Bakiyesi (Kümülatif)', color='purple')
-plt.axhline(0, color='black', linestyle='--', linewidth=1)
-plt.title('Ev Satılmadan Kümülatif Nakit Akışı')
-plt.xlabel('Ay')
-plt.ylabel('Banka Bakiyesi (€)')
-plt.grid(True)
-plt.legend()
-plt.tight_layout()
-plt.savefig('kumulatif_nakit_akisi.png')
 plt.show()

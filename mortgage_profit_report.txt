@@ -1,0 +1,11 @@
+
+Mortgage Profit Maximization - Optimization Report
+
+🏠 Optimal Loan Amount      : €500,000.00
+⏳ Optimal Holding Period   : 10 years
+📉 Total Rent Saved         : €144,000.00
+💸 Total Interest Paid      : €150,000.00
+🏛️ Total Taxes/Maintenance  : €15,000.00
+📈 Estimated Sale Value     : €609,497.21
+
+💰 Net Profit               : €588,497.21
